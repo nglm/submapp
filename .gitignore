@@ -1,0 +1,17 @@
+# ignore some folders
+objects/
+figs/
+docs/build
+docs/source/submapp
+
+# ignore data
+GotmFabmErsem-BATS.nc
+
+# ignore VSC hidden files
+*__pycache__*
+*.vscode
+
+# ignore notebooks EXCEPT from tuto
+*.ipynb
+!tuto_hmm.ipynb
+!tuto_som.ipynb

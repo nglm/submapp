@@ -1,0 +1,36 @@
+.. SubMAPP documentation master file, created by
+   sphinx-quickstart on Tue Jun  4 19:06:02 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+.. _index:
+
+Welcome to SubMAPP's documentation!
+===================================
+
+
+--------
+Package
+--------
+
+.. automodule:: submapp
+
+---------
+Modules
+---------
+
+.. autosummary::
+   :toctree: submapp
+   :nosignatures: 
+
+   submapp.som
+   submapp.hmm
+   submapp.map2d
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
