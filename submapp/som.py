@@ -133,7 +133,7 @@ class Som:
             n: int, 
             m: int, 
             p: int = 1, 
-            dist_matrix: np.ndarray = None, 
+            distance_matrix: np.ndarray = None, 
             weights: np.ndarray = None,
             name: str = "MySom", 
             data_mean: np.ndarray = np.array([0]), 
@@ -161,14 +161,14 @@ class Som:
             too). Should be consistent. Can't be changed after
             initialization, defaults to ``1``
         :type p: int, optional
-        :param dist_matrix: 
+        :param distance_matrix: 
             Matrix of relative distances between every class. 
             Required shape: ``(n*m, n*m)``
             This matrix defines the "shape" of the SOM (eg. hexagonal,
             rectangular, etc.), defaults to None, in this case it
             is a rectangular map (euclidean distance between classes)
             (can't be changed after initialization)
-        :type dist_matrix: np.ndarray, optional
+        :type distance_matrix: np.ndarray, optional
         :param weights:
             Initial weights. Required shape: ``(n*m, p)``
             Since the weights are meant to represent
@@ -236,21 +236,21 @@ class Som:
         # Matrix of relative distances between classes.
         # This matrix defines the "shape" of the SOM
         # (eg. hexagonal, rectangular, etc.)
-        if dist_matrix is None:
+        if distance_matrix is None:
             # Default value is a rectangular map (euclidean distance)
-            self.__dist_matrix = np.zeros(
+            self.__distance_matrix = np.zeros(
                 (self.nb_class, self.nb_class), dtype=float
             )
             for i in range(self.nb_class):
                 [i1, j1] = self.__location_classes[i, :]
                 for j in range(self.nb_class):
                     [i2, j2] = self.__location_classes[j, :]
-                    # self.__dist_matrix[i,j] = abs(i1-i2) + abs(j1-j2)
-                    self.__dist_matrix[i, j] = sqrt(
+                    # self.__distance_matrix[i,j] = abs(i1-i2) + abs(j1-j2)
+                    self.__distance_matrix[i, j] = sqrt(
                         (i1 - i2)**2 + (j1 - j2)**2
                     )
         else:
-            self.__dist_matrix = np.abs(dist_matrix)
+            self.__distance_matrix = np.abs(distance_matrix)
 
         # weights[k] = referent vector of the class k
         # usually weights should be initialized according to the
@@ -321,11 +321,11 @@ class Som:
                 tf.float32, (self.nb_class, self.__p), name="Weights")
             vect_input = tf.placeholder(
                 tf.float32, (1, self.__p), name="Input")
-            # distance_to_bmu[k] = dist_matrix[bmu, k]
+            # distance_to_bmu[k] = distance_matrix[bmu, k]
             distance_to_bmu = tf.placeholder(
                 tf.float32, (self.nb_class, 1), name="Distance_to_BMU")
             curr_it = tf.placeholder(tf.float32, name="Current_Iteration")
-            training_dataset_size = tf.placeholder(tf.float32, name="Training_dataset_size")
+            T_train = tf.placeholder(tf.float32, name="T_train")
 
             # Find the BMU (class whose referent vector minimizes the
             # euclidean distance to the input)
@@ -350,10 +350,10 @@ class Som:
 
             # Radius sigma
             # sigma = tf.multiply(s0, tf.exp(-curr_it/ep), name="Sigma_Op")
-            sigma = s0 - curr_it*(s0 - sT)/training_dataset_size
+            sigma = s0 - curr_it*(s0 - sT)/T_train
 
             # Learning rate r
-            r = a0 - curr_it*(a0 - aT)/training_dataset_size
+            r = a0 - curr_it*(a0 - aT)/T_train
 
             # Neighborhood function h
             h = tf.exp(-(distance_to_bmu) / sigma)
@@ -363,7 +363,7 @@ class Som:
 
     def sample_weights_initialization(
             self, 
-            training_data: np.ndarray,
+            data_train: np.ndarray,
             ) -> None:
         """Initialize weights with a sample of the training data
 
@@ -374,8 +374,8 @@ class Som:
         :ref:`is_trained <submapp.som.Som.is_trained>`
         to ``False``
         
-        :param training_data: Training data 
-        :type training_data: np.ndarray[float], shape = (_, p)
+        :param data_train: Training data 
+        :type data_train: np.ndarray[float], shape = (_, p)
         :rtype: None
 
         .. seealso:: 
@@ -386,13 +386,13 @@ class Som:
         """
 
         # Ignore vectors containing NaN values
-        training_data_available = remove_nan(training_data)
-        T = len(training_data_available)
+        data_train_available = remove_nan(data_train)
+        T = len(data_train_available)
         if (T < self.nb_class):
             print("Not enough data: only ", T, " vectors available")
         else:
             ind = random.sample(range(T), self.nb_class)
-            self.__weights = training_data_available[ind]
+            self.__weights = data_train_available[ind]
 
             # Re-initializes the SOM properties
             self.clear_map_info()
@@ -400,7 +400,7 @@ class Som:
 
     def pca_weights_initialization(
             self, 
-            training_data: np.ndarray,
+            data_train: np.ndarray,
             ) -> None:
         """Initialize weights with a PCA of the training data
 
@@ -411,8 +411,8 @@ class Som:
         :ref:`is_trained <submapp.som.Som.is_trained>`
         to ``False``
         
-        :param training_data: Training data 
-        :type training_data: np.ndarray[float], shape = (_, p)
+        :param data_train: Training data 
+        :type data_train: np.ndarray[float], shape = (_, p)
         :rtype: None
 
         .. seealso:: 
@@ -423,10 +423,10 @@ class Som:
         """
 
         # Ignore vectors containing NaN values
-        training_data_available = remove_nan(training_data)
+        data_train_available = remove_nan(data_train)
         # Projection onto the 2 first principal components
         pca = PCA(n_components=2, whiten=True)
-        proj_pca = pca.fit_transform(training_data_available)
+        proj_pca = pca.fit_transform(data_train_available)
         # Group theses points projected into only nb_class clusters 
         kmeans = KMeans(n_clusters=self.nb_class).fit(proj_pca)
         cluster_centers = kmeans.cluster_centers_
@@ -518,8 +518,8 @@ class Som:
 
     def train(
             self, 
-            inputs: np.ndarray, 
-            training_dataset_size: int = None, 
+            data_train: np.ndarray, 
+            T_train: int = None, 
             batch_size: int = None, 
             param: Tuple[float, float, float, float] = None,
             missing_data: bool = False,
@@ -527,8 +527,8 @@ class Som:
         """Train the SOM (ie update the weights) provided training\
         data.
 
-        Update weights - for all inputs 
-        :math:`x[t] \\; t \\in [0, len(inputs)]` - as follows 
+        Update weights - for all input 
+        :math:`x[t] \\; t \\in [0, len(data_train)]` - as follows 
 
         .. math::
         
@@ -538,16 +538,16 @@ class Som:
             \\times exp[\\frac{dist(weights[k],BMU(t))}{ s^{2}(t) } ]\
             \\times [weights[k]-x[t]]
         
-        :param inputs: Training data 
-        :type inputs: np.ndarray[float], shape = (_, p)
-        :param training_dataset_size:
-            Size of the training dataset. Once 
-            ``training_dataset_size`` vector inputs
+        :param data_train: Training data 
+        :type data_train: np.ndarray[float], shape = (_, p)
+        :param T_train:
+            Size of the entire training dataset. Once 
+            ``T_train`` vectors
             have been used since the last time a new value of ``param``
             was given, the learning rate and the radius take their
             final value (i.e. ``aT`` and ``sT``). Defaults to None,
-            In this case, ``training_dataset_size=len(inputs)``.
-        :type training_dataset_size: int, optional
+            In this case, ``T_train=len(data_train)``.
+        :type T_train: int, optional
         :param batch_size: 
             NOT IMPLEMENTED YET.
             Defaults to None, in this case ``batch_size=1``
@@ -561,7 +561,7 @@ class Som:
                 - ``s0``: initial radius (``0<s0``)
                 - ``sT``: final radius (``0<sT``)
 
-            For each iteration (vector from ``inputs``) the learning
+            For each iteration (vector from ``data_train``) the learning
             rate and the radius decrease linearly until they reach
             their final value.
 
@@ -578,14 +578,14 @@ class Som:
 
         :type param: Tuple[float, float, float, float], optional
         :param missing_data: 
-            indicates whether ``inputs`` contains missing data
+            indicates whether ``data_train`` contains missing data
             (represented by ``np.nan``),
             NOT IMPLEMENTED YET
             Defaults to False.
 
             .. warning:: 
 
-                if ``missing_data=False`` and ``inputs`` does
+                if ``missing_data=False`` and ``data_train`` does
                 contain missing data then results will be 
                 inconsistent
 
@@ -600,9 +600,9 @@ class Som:
         sess = tf.Session(graph=self.__graph)
 
         start = time()
-        nb_inputs = len(inputs)
-        if training_dataset_size is None:
-            training_dataset_size = nb_inputs
+        nb_inputs = len(data_train)
+        if T_train is None:
+            T_train = nb_inputs
 
         # Sorted instants 
         sorted_time = np.array(range(nb_inputs))
@@ -615,7 +615,7 @@ class Som:
 
             vect_input = g.get_tensor_by_name("Input" + ":0")
             weights = g.get_tensor_by_name("Weights" + ":0")
-            tr_size = g.get_tensor_by_name("Training_dataset_size" + ":0")
+            data_train_size = g.get_tensor_by_name("T_train" + ":0")
             curr_it = g.get_tensor_by_name("Current_Iteration" + ":0")
             bmu_op = g.get_tensor_by_name("BMU_op" + ":0")
             training_op = g.get_tensor_by_name("Training_Op" + ":0")
@@ -624,9 +624,9 @@ class Som:
             relerr = []  # list of relative error for each input vector
 
             # Main loop:
-            # Train the model (weights) for each vector in inputs
+            # Train the model (weights) for each vector in data_train
             for t in shuffled_time:
-                v_i = inputs[t]  # select input vector (from random instant!)
+                v_i = data_train[t]  # select input vector (from random instant!)
                 v_i = np.reshape(v_i, (1, self.__p))
 
                 # Find the BMU
@@ -635,7 +635,7 @@ class Som:
                     feed_dict={vect_input: v_i, weights: self.__weights}
                     ))
 
-                dist_to_bmu = self.__dist_matrix[bmu_loc]
+                dist_to_bmu = self.__distance_matrix[bmu_loc]
                 dist_to_bmu = np.reshape(dist_to_bmu, (self.nb_class, 1))
 
                 # Update weights
@@ -644,7 +644,7 @@ class Som:
                     distance_to_bmu: dist_to_bmu,
                     curr_it: self.__current_iteration,
                     weights: self.__weights,
-                    tr_size: training_dataset_size})
+                    data_train_size: T_train})
                 self.__current_iteration += 1
                 self.__nb_training_iterations += 1
 
@@ -659,13 +659,13 @@ class Som:
                 self.__relerr_train, np.nanmean(relerr))
             sess.close()
         end = time()
-        print(nb_inputs, " inputs trained in ", round(end - start, 2), " sec")
+        print(nb_inputs, " vectors have trained the SOM ", round(end - start, 2), " sec")
         # print(" mean relative error: ", np.mean(relerr)) 
         
 
     def map(
             self, 
-            inputs: np.ndarray,
+            data_map: np.ndarray,
             ) -> np.ndarray:
         """Map data onto the SOM 
 
@@ -678,17 +678,17 @@ class Som:
         within an input vector then the BMU is found according to the
         non-missing values remaining
         
-        :param inputs: Vectors that have to be mapped (*real* data)
-        :type inputs: np.ndarray[float], shape = (_, p)
+        :param data_map: Vectors that have to be mapped (*real* data)
+        :type data_map: np.ndarray[float], shape = (_, p)
 
         :return: 
-            Vector of classes representing each vector of ``inputs``
-            ie: ``classes[k]`` is the BMU of ``inputs[k]``
-        :rtype: np.ndarray[float], shape(len(inputs))
+            Vector of classes representing each vector of ``data_map``
+            ie: ``classes[k]`` is the BMU of ``data_map[k]``
+        :rtype: np.ndarray[float], shape(len(data_map))
         """
 
         start = time()
-        nb_inputs = len(inputs)
+        nb_inputs = len(data_map)
         classes = np.zeros(nb_inputs, dtype=int)
         sess = tf.Session()
         weights = tf.placeholder(tf.float32, (self.nb_class, self.__p))
@@ -705,12 +705,12 @@ class Som:
         t = 0
         relerr = []  # list of relative error for each input vector
         nb_missing_data = 0  # nb of missing values in each input vector
-        nb_missing_values = 0  # total number of missing values in inputs
-        nb_missing_vectors = 0  # total number of missing vectors in inputs 
+        nb_missing_values = 0  # total number of missing values in data_map
+        nb_missing_vectors = 0  # total number of missing vectors in data_map
 
         # Main loop:
-        # map (find the BMU) each vector in inputs
-        for v_i in inputs:
+        # map (find the BMU) each vector in data_map
+        for v_i in data_map:
             v_i = np.reshape(v_i, (1, self.__p))
 
             nb_missing_data = np.count_nonzero(np.isnan(v_i))
@@ -752,7 +752,7 @@ class Som:
                     # Note that nb_inputs_mapped != len(dist_transition)
                     self.__dist_transition = np.append(
                         self.__dist_transition,
-                        self.__dist_matrix[classes[t - 1], classes[t]],
+                        self.__distance_matrix[classes[t - 1], classes[t]],
                     )
 
             # Compute relative error
@@ -769,12 +769,12 @@ class Som:
 
         relerr = np.nanmean(relerr)
         values = self.class2weights(classes)
-        true_values = self.destandardize(inputs)
+        true_values = self.destandardize(data_map)
         mse = self.__compute_mse(values, true_values, is_standardized=False)
         self.__relerr_test = np.append(self.__relerr_test, relerr)
         sess.close()
         end = time()
-        print(nb_inputs, " inputs mapped in ", round(end - start, 2), " sec")
+        print(nb_inputs, " vectors mapped in ", round(end - start, 2), " sec")
         if nb_missing_values:
             print("Number of missing values: ", nb_missing_values)
             print("Number of missing vectors: ", nb_missing_vectors)
@@ -1128,7 +1128,7 @@ class Som:
 
         :rtype: np.ndarray[float], shape = (nb_class, nb_class)
         """
-        return np.copy(self.__dist_matrix)
+        return np.copy(self.__distance_matrix)
 
     @property
     def weights(self) -> np.ndarray:

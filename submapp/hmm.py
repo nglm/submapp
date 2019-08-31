@@ -1,4 +1,4 @@
-"""Implements ``Hmm`` class
+""" ``hmm`` module implementing ``Hmm`` class
 
 """
 
@@ -73,7 +73,9 @@ def copy(hmm):
 
 
 class Hmm:
-    """Basic and easy-to-use implementation of Hidden Markov Model
+    """Hidden Markov Model
+
+    
 
     :var str name: 
         The *Name* of the Hmm object. This name has no impact on
