@@ -1,6 +1,6 @@
 {{ fullname | escape | underline}}
 
-.. _{{ fullname}}:
+.. _{{ fullname }}:
 
 .. currentmodule:: {{ module }}
 

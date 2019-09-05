@@ -219,16 +219,29 @@ filename=None,zmin=None,zmax=None, cmap=None, figsize=None) :
     plt.show()
    
 
-def print_error(relerr,legend=None,save=False, filename=None,path=None) :   
+def print_error(
+        relerr,
+        legend=None, 
+        zmin=None,
+        zmax=None,
+        save=False,
+        filename=None,
+        path=None,
+        ) :   
     T_year = len(relerr)
     if legend is None:
         legend = "Error"
+    if zmin is None:
+        zmin = np.nanmin(relerr)
+    if zmax is None:
+        zmax = np.nanmax(relerr)
     #plot error
     plt.figure()
     x = np.linspace(0,T_year,T_year)
     plt.xlabel('Time')
     plt.ylabel('Relative error')
     plt.title(legend)
+    plt.axis([0, T_year-1, zmin, zmax])
     plt.plot(x, relerr)
     if save:
         if path is None:

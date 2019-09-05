@@ -35,7 +35,7 @@ def save(som, filename: str = None, path: str = "") -> None:
     :type path: str, optional
     :rtype: None
 
-    .. seealso:: :ref:`load <submapp.som.load>`
+    .. seealso:: :doc:`load <submapp.som.load>`
     """
 
     som._Som__clear_graph()
@@ -58,7 +58,7 @@ def load(filename: str, path: str = "") -> S :
     :return: The loaded SOM stored at "path/filename"
     :rtype: Som
 
-    .. seealso:: :ref:`save <save>`
+    .. seealso:: :doc:`save <submapp.som.save>`
     """
 
     with open(path + filename, "rb") as f:
@@ -116,7 +116,7 @@ class Som:
        :ref:`weights_features <submapp.som.Som.weights_features>`,\
        :ref:`time_info <submapp.som.Som.time_info>`,\
        :ref:`transition <submapp.som.Som.transition>`,\
-       :ref:`distance_transition <submapp.som.Som.distance_transition>`,\
+       :ref:`distance_transitions <submapp.som.Som.distance_transitions>`,\
        :ref:`print_heatmap <submapp.som.Som.print_heatmap>`,\
        :ref:`relerr_test <submapp.som.Som.relerr_test>`
 
@@ -293,7 +293,7 @@ class Som:
         # (k1 BMU instant t-1 and k2 BMU at instant t)
         self.__transition = np.zeros(
             (self.nb_class, self.nb_class), dtype=int)
-        # distance_transition[t] = relative distance between k1 and k2
+        # distance_transitions[t] = relative distance between k1 and k2
         # where k1 was BMU at instant t-1 and k2 BMU at instant t
         self.__dist_transition = np.copy([])
         # Relative error between the input vectors and the referent
@@ -716,7 +716,7 @@ class Som:
             nb_missing_data = np.count_nonzero(np.isnan(v_i))
             nb_missing_values += nb_missing_data
                 
-            # affect default class if the entire vector is missing
+            # affect default class to bmu_loc if the entire vector is missing
             if nb_missing_data == self.__p:
                 bmu_loc = -1
                 nb_missing_vectors += 1
@@ -884,7 +884,7 @@ class Som:
 
         List of data cleared:
             - :ref:`nb_inputs_mapped <submapp.som.Som.nb_inputs_mapped>`
-            - :ref:`distance_transition <submapp.som.Som.distance_transition>`
+            - :ref:`distance_transitions <submapp.som.Som.distance_transitions>`
             - :ref:`transition <submapp.som.Som.transition>`
             - :ref:`relerr_test <submapp.som.Som.relerr_test>`
             - :ref:`occ_bmu_map <submapp.som.Som.occ_bmu_map>`
@@ -1124,7 +1124,9 @@ class Som:
 
             j_1, j_2 & \\in [|0, m |]
 
-        Note: ``(i, j) = `` :ref:`location_classes[k] <submapp.som.Som.location_classes>`
+        Note: 
+        
+            ``(i, j)`` = :ref:`location_classes[k] <submapp.som.Som.location_classes>`
 
         :rtype: np.ndarray[float], shape = (nb_class, nb_class)
         """
@@ -1178,6 +1180,11 @@ class Som:
         set of hyperparameters 
         
         :rtype: np.ndarray[int], shape = (nb_class)
+
+        .. warning::
+        
+            Should not be confused with
+            :doc:`Map2d.occ_bmu_map <../../map2d/Map2d/submapp.map2d.Map2d.occ_bmu_map>`
         """
         return np.copy(self.__occ_bmu_map)
 
@@ -1372,7 +1379,7 @@ class Som:
         return np.copy(self.__stdev)
 
     @property
-    def distance_transition(self) -> np.ndarray:
+    def distance_transitions(self) -> np.ndarray:
         """Vector of distance between consecutive BMU mapped by the SOM
         
         Let ``BMU(t-1)`` and ``BMU(t)`` be the BMU at instant 
@@ -1382,8 +1389,8 @@ class Som:
 
         .. code-block:: python
 
-            distance_transition = np.append(
-                distance_transition,
+            distance_transitions = np.append(
+                distance_transitions,
                 distance_matrix[BMU(t-1), BMU(t)])
 
         Note that ``nb_inputs_mapped != len(dist_transition)`` because
@@ -1396,6 +1403,11 @@ class Som:
             between consecutive input vectors
         
         :rtype: np.ndarray[float]
+
+        .. warning::
+        
+            Should not be confused with
+            :doc:`Map2d.distance_transitions <../../map2d/Map2d/submapp.map2d.Map2d.distance_transitions>`
         """
         return np.copy(self.__dist_transition)
 
@@ -1415,6 +1427,11 @@ class Som:
             different scale of time.
             
         :rtype: np.ndarray[int], shape = (nb_class, nb_class)
+
+        .. warning::
+        
+            Should not be confused with
+            :doc:`Map2d.transition <../../map2d/Map2d/submapp.map2d.Map2d.transition>`
         """
         return np.copy(self.__transition)
 

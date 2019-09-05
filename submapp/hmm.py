@@ -31,7 +31,7 @@ def save(hmm, filename: str = None, path: str = "") -> None:
     :type path: str, optional
     :rtype: None
 
-    .. seealso:: :doc:`submapp.hmm.load`
+    .. seealso:: :doc:`load <submapp.hmm.load>`
     """
 
     hmm._Hmm__graph = None
@@ -54,7 +54,7 @@ def load(filename: str, path: str = ""):
     :return: The loaded HMM stored at "path/filename"
     :rtype: Hmm
 
-    .. seealso:: :doc:`submapp.hmm.save>`
+    .. seealso:: :doc:`save <submapp.hmm.save>`
     """
 
     with open(path + filename, "rb") as f:
@@ -75,7 +75,7 @@ def copy(hmm):
 class Hmm:
     """Hidden Markov Model
 
-    
+
 
     :var str name: 
         The *Name* of the Hmm object. This name has no impact on

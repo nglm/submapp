@@ -44,8 +44,8 @@ def distance_between_labels(map1, map2) -> np.ndarray:
 
 
     .. seealso::
-        - :ref:`count_differences <count_differences>`
-        - :ref:`confusion_matrix <confusion_matrix>`
+        - :doc:`count_differences <submapp.map2d.count_differences>`
+        - :doc:`confusion_matrix <submapp.map2d.confusion_matrix>`
 
     """
 
@@ -91,8 +91,8 @@ def count_differences(
 
     .. seealso::
     
-        - :ref:`distance_between_labels <distance_between_labels>`
-        - :ref:`confusion_matrix <confusion_matrix>`
+        - :doc:`distance_between_labels <submapp.map2d.distance_between_labels>`
+        - :doc:`confusion_matrix <submapp.map2d.confusion_matrix>`
 
     """
     if ignore_missing_vector:
@@ -142,8 +142,8 @@ def confusion_matrix(
 
     .. seealso::
     
-        - :ref:`distance_between_labels <distance_between_labels>`
-        - :ref:`count_differences <count_differences>`
+        - :doc:`distance_between_labels <submapp.map2d.distance_between_labels>`
+        - :doc:`count_differences <submapp.map2d.count_differences>`
 
     """
     true_classes = true_map.classes
@@ -181,7 +181,7 @@ def concat_maps(
     :type path: str, optional
     :rtype: Map2d
 
-    .. seealso:: :doc:`submapp.map2d.copy`
+    .. seealso:: :doc:`copy <submapp.map2d.copy>`
     """
 
     if name is None:
@@ -215,7 +215,7 @@ def save(
     :type path: str, optional
     :rtype: None
 
-    .. seealso:: :doc:`submapp.map2d.load`
+    .. seealso:: :doc:`load <submapp.map2d.load>`
     """
 
     myMap._Map2d__clear_graph()
@@ -239,7 +239,7 @@ def load(filename: str, path: str = ""):
     :return: The loaded Map2d stored at "path/filename"
     :rtype: Map2d
 
-    .. seealso:: :ref:`save <save>`
+    .. seealso:: :doc:`save <submapp.map2d.save>`
     """
 
     with open(path + filename, "rb") as f:
@@ -301,7 +301,7 @@ class Map2d:
 
     - :ref:`distance_matrix <submapp.som.Som.distance_matrix>`, 
       give the distance between 2 classes
-    - :ref:`distance_transition <submapp.som.Som.distance_transition>`,
+    - :ref:`distance_transitions <submapp.som.Som.distance_transitions>`,
       stores the distance of all transitions mapped by the SOM
     - :ref:`weights <submapp.som.Som.weights>`, 
       Referent vectors (weights) associated to all classes
@@ -437,9 +437,10 @@ class Map2d:
             ) -> None:
         """Add true values to the Map2d
         
-        :param new_true_values: New
-        :ref:`true_values <submapp.map2d.Map2d.true_values>`
-        value
+        :param new_true_values: 
+            New
+            :ref:`true_values <submapp.map2d.Map2d.true_values>`
+            value
         :type new_true_values: np.ndarray[float]
         :param overwrite: 
             Determine whether ``new_true_values`` should overwrite the 
@@ -463,8 +464,10 @@ class Map2d:
             ) -> None:
         """Add values to the Map2d
         
-        :param new_values: New
-        :ref:`values <submapp.map2d.Map2d.values>`
+        :param new_values: 
+            New 
+            :ref:`values <submapp.map2d.Map2d.values>`
+            value
         :type new_values: np.ndarray[float]
         :param overwrite: 
             Determine whether ``new_value`` should overwrite the 
@@ -623,34 +626,6 @@ class Map2d:
         return self.__som.nb_class
 
     @property
-    def nb_classes_used(self) -> int:
-        """Number of different classes used by the Map2d
-
-        .. note::
-        
-            In case of missing vectors the associated class ``-1``
-            is counted like any other classes.
-        
-        :rtype: int
-        """
-
-        u = np.unique(self.__classes)
-        return u.size
-
-    @property
-    def nb_inputs_mapped(self) -> int:
-        """Number of inputs (classes or vectors) mapped by the Map2
-
-        .. note::
-        
-            Missing vectors or classes are counted like any other
-            regular vectors or classes.
-                
-        :rtype: int
-        """
-        return np.size(self.__classes)
-
-    @property
     def som(self):
         """SOM of the Map2d
         
@@ -789,6 +764,11 @@ class Map2d:
             occ_bmu_map[BMU(t)] += 1
         
         :rtype: np.ndarray[int], shape = (nb_class)
+
+        .. warning::
+        
+            Should not be confused with
+            :doc:`Som.occ_bmu_map <../../som/Som/submapp.som.Som.occ_bmu_map>`
         """
         
         occ = np.zeros((self.nb_class))
@@ -797,7 +777,7 @@ class Map2d:
         return occ
 
     @property
-    def distance_transition(self) -> np.ndarray:
+    def distance_transitions(self) -> np.ndarray:
         """Vector of distance between consecutive BMU within the map
         
         Let ``BMU(t-1)`` and ``BMU(t)`` be the BMU at instant 
@@ -807,8 +787,8 @@ class Map2d:
 
         .. code-block:: python
 
-            distance_transition = np.append(
-                distance_transition,
+            distance_transitions = np.append(
+                distance_transitions,
                 distance_matrix[BMU(t-1), BMU(t)])
 
         .. warning::
@@ -816,8 +796,18 @@ class Map2d:
             This attribute is meaningless if the map
             is not used with time-series or if there is no correlation
             between consecutive input vectors
-        
+
         :rtype: np.ndarray[float]
+
+        .. warning::
+        
+            Should not be confused with
+            :doc:`Som.distance_transitions <../../som/Som/submapp.som.Som.distance_transitions>`
+
+        .. seealso::
+
+            - :ref:`nb_missing_transitions <submapp.map2d.Map2d.nb_missing_transitions>`
+            - :ref:`transition <submapp.map2d.Map2d.transition>`
         """
 
         nb_inputs = self.__classes.size
@@ -846,8 +836,18 @@ class Map2d:
             This attribute is meaningless if the SOM
             is not used with time-series or if each input has a 
             different scale of time.
-            
+
         :rtype: np.ndarray[int], shape = (nb_class, nb_class)
+
+        .. warning::
+        
+            Should not be confused with
+            :doc:`Som.transition <../../som/Som/submapp.som.Som.transition>`
+
+        .. seealso::
+
+            - :ref:`nb_missing_transitions <submapp.map2d.Map2d.nb_missing_transitions>`
+            - :ref:`distance_transitions <submapp.map2d.Map2d.distance_transitions>`
         """
 
         nb_inputs = self.__classes.size
@@ -867,6 +867,14 @@ class Map2d:
         """Number of transitions missed due to missing vectors
         
         :rtype: int
+
+        .. seealso::
+
+            - :ref:`nb_missing_values <submapp.map2d.Map2d.nb_missing_values>`
+            - :ref:`nb_missing_vectors <submapp.map2d.Map2d.nb_missing_vectors>`
+            - :ref:`transition <submapp.map2d.Map2d.transition>`
+            - :ref:`distance_transitions <submapp.map2d.Map2d.distance_transitions>`
+            - :doc:`nb_inputs_mapped <submapp.map2d.Map2d.nb_inputs_mapped>`
         """
         n = np.size(self.__classes)
         res = 0
@@ -881,6 +889,12 @@ class Map2d:
         """Number of missing vectors in the data mapped
         
         :rtype: int
+
+        .. seealso::
+
+            - :ref:`nb_missing_values <submapp.map2d.Map2d.nb_missing_values>`
+            - :ref:`nb_missing_transitions <submapp.map2d.Map2d.nb_missing_transitions>`
+            - :doc:`nb_inputs_mapped <submapp.map2d.Map2d.nb_inputs_mapped>`
         """
         n = np.size(self.__classes)
         res = 0
@@ -895,6 +909,53 @@ class Map2d:
         """Number of missing values in the data mapped
         
         :rtype: int
+
+        .. seealso::
+
+            - :ref:`nb_missing_vectors <submapp.map2d.Map2d.nb_missing_vectors>`
+            - :ref:`nb_missing_transitions <submapp.map2d.Map2d.nb_missing_transitions>`
+            - :doc:`nb_inputs_mapped <submapp.map2d.Map2d.nb_inputs_mapped>`
         """
         return np.count_nonzero(np.isnan(self.__values))
 
+    @property
+    def nb_classes_used(self) -> int:
+        """Number of different classes used by the Map2d
+
+        .. note::
+        
+            In case of missing vectors the associated class ``-1``
+            is counted like any other classes.
+        
+        :rtype: int
+
+        .. seealso::
+
+            - :doc:`nb_missing_vectors <submapp.map2d.Map2d.nb_missing_vectors>`
+            - :doc:`nb_missing_transitions <submapp.map2d.Map2d.nb_missing_transitions>`
+            - :doc:`nb_missing_values <submapp.map2d.Map2d.nb_missing_values>`
+            - :doc:`nb_inputs_mapped <submapp.map2d.Map2d.nb_inputs_mapped>`
+        """
+
+        u = np.unique(self.__classes)
+        return u.size
+
+    @property
+    def nb_inputs_mapped(self) -> int:
+        """Number of inputs (classes or vectors) mapped by the Map2
+
+        .. note::
+        
+            Missing vectors or classes are counted like any other
+            regular vectors or classes.
+                
+        :rtype: int
+
+        .. seealso::
+
+            - :doc:`nb_missing_vectors <submapp.map2d.Map2d.nb_missing_vectors>`
+            - :doc:`nb_missing_transitions <submapp.map2d.Map2d.nb_missing_transitions>`
+            - :doc:`nb_missing_values <submapp.map2d.Map2d.nb_missing_values>`
+            - :doc:`nb_classes_used <submapp.map2d.Map2d.nb_classes_used>`
+        """
+        return np.size(self.__classes)
