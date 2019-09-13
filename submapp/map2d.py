@@ -376,7 +376,9 @@ class Map2d:
             :ref:`map_from_classes <submapp.map2d.Map2d.map_from_classes>`
 
         """
-        new_classes = self.__som.map(inputs)
+        
+        # We use self.som rather than self.__som not to change map_info
+        new_classes = self.som.map(inputs)
         new_values = self.__som.class2weights(new_classes).squeeze()
         true_values = self.__som.destandardize(inputs)
 
