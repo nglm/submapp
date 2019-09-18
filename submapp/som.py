@@ -1242,7 +1242,7 @@ class Som:
 
         .. seealso:: 
 
-            - :ref:`n <submapp.som.Som.n>` number of columns
+            - :ref:`n <submapp.som.Som.n>` number of rows
             - :ref:`m <submapp.som.Som.m>` number of columns
             - :ref:`nb_class <submapp.som.Som.nb_class>` total number
               of classes ``n*m``

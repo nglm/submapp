@@ -527,7 +527,7 @@ class Map2d:
 
         .. seealso:: 
 
-            - :ref:`n <submapp.map2d.Map2d.n>` number of columns
+            - :ref:`n <submapp.map2d.Map2d.n>` number of rows
             - :ref:`m <submapp.map2d.Map2d.m>` number of columns
             - :ref:`nb_class <submapp.map2d.Map2d.nb_class>` total number
               of classes ``n*m``
