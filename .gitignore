@@ -1,9 +1,10 @@
-# ignore some folders
-pytool/
-objects/
-figs/
-docs/build
-docs/source/submapp
+# ignore almost all folders
+*/*
+!img/*
+!docs/source/make.bat
+!docs/source/Makefile
+!docs/source/_*
+!submapp/*!
 
 # ignore data
 GotmFabmErsem-BATS.nc
