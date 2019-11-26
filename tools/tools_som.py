@@ -238,7 +238,7 @@ def print_error(
     #plot error
     plt.figure()
     x = np.linspace(0,T_year,T_year)
-    plt.xlabel('Time')
+    plt.xlabel('Time [arbitrary indices]')
     plt.ylabel('Relative error')
     plt.title(legend)
     plt.axis([0, T_year-1, zmin, zmax])

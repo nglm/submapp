@@ -453,9 +453,9 @@ class Som:
     def random_weights_initialization(
             self, 
             distribution: str = None,
-
             ) -> None:
-        """Initialize weights randomly 
+        """
+        Initialize weights randomly 
 
         As this method (re-)initializes
         the weights it also calls the method
