@@ -10,4 +10,4 @@ In addition, 2 tutorials are available, to give an overview of how to use SubMAP
 - [`tuto_hmm.ipynb`](./tuto_hmm.ipynb): Trains a HMM model in order to infer subsurface data from the surface data, using the 2 trained SOMs.
 
 [^Gal]: N. Galmiche, J. Brajard, A. Charantonis, and T. Wakamatsu, “Impact of sparse profile sampling on the reconstruction of subsurface ocean temperature from surface information,” in Proceedings of the 9th International Workshop on Climate Informatics: CI 2019, NCAR, 2019, pp. 87–91. doi: 10.5065/y82j-f154.
-[^Char]: A. A. Charantonis, F. Badran, and S. Thiria, “Retrieving the evolution of vertical proles of chlorophyll-a from satellite observations using hidden markov models and self-organizing topological maps,” Remote Sensing of Environment, vol. 163, pp. 229–239, 2015.
+[^Char]: A. A. Charantonis, F. Badran, and S. Thiria, “Retrieving the evolution of vertical profiles of chlorophyll-a from satellite observations using hidden markov models and self-organizing topological maps,” Remote Sensing of Environment, vol. 163, pp. 229–239, 2015.
